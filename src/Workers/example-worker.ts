@@ -17,8 +17,8 @@ WorkerAdapter.handle<FetchRequest, FetchResponse>('fetch-json', async (request) 
 
 WorkerAdapter.handle<Object, boolean>("graceful-shutdown", _ => {
     return new Promise<boolean>((res, rej) => {
+        console.log('faking graceful shutdown handling, waiting 5s...');
         setTimeout(() => {
-            console.log('faking graceful shutdown handling');
             res(true);
         }, 5000);
     });
