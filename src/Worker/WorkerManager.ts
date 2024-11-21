@@ -6,7 +6,8 @@ import { RequestMessage } from './RequestMessage';
 
 export interface RequestResponse {
     resolve: (response: any) => void,
-    reject: (err: any) => void
+    reject: (err: any) => void,
+    timeout: NodeJS.Timeout
 }
 
 export interface RequestOptions {
@@ -37,14 +38,14 @@ export class WorkerManager {
         const promise = new Promise<TResponse>((resolve, reject) => {
             const id = this.requestId++;
     
-            setTimeout(() => {
+            const timeout = setTimeout(() => {
                 if (this.processing.has(id)) {
                     reject('timeout');
                     this.processing.delete(id);
                 }
             }, mergedOptions.timeout);
     
-            this.processing.set(id, { resolve, reject });
+            this.processing.set(id, { resolve, reject, timeout });
             
             // send it.
             this.worker.postMessage(<RequestMessage>{
@@ -61,6 +62,9 @@ export class WorkerManager {
         const existingProcess = this.processing.get(message.id);
         if (existingProcess) {
     
+            // clean the timeout.
+            window.clearTimeout(existingProcess.timeout);
+
             const parsedResult = JSON.parse(message.result);
             if (message.status == 'fulfiled') {
                 existingProcess.resolve(parsedResult);
