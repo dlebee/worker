@@ -58,7 +58,6 @@ export class WorkerManager {
     }
 
     protected handleIncomingMessage(message: ResponseMessage) {
-        console.log('message back', message);
         const existingProcess = this.processing.get(message.id);
         if (existingProcess) {
     
